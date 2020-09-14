@@ -11,10 +11,10 @@
     <!--未完成的-->
     <div>
       <div>未完成的：</div>
-      <div v-for="item in todo.items" :key="item.uuid">
+      <div class="todo-item" v-for="item in todo.items" :key="item.uuid">
         <template v-if="!item.deleted && !item.completed">
-          <el-button class="todo-button" size="mini" icon="el-icon-check" circle @click="item.completed = true;"></el-button>
-          <el-input class="todo-title" size="small" v-model="item.title"></el-input>
+          <el-button class="todo-button" size="mini" icon="el-icon-check" circle @click="updateStatus(item, true)"></el-button>
+          <el-input class="todo-title" size="small" v-model="item.title" @change="updateItem(item)"></el-input>
           <el-button class="todo-button" size="mini" icon="el-icon-delete" circle @click="removeItem(item)"></el-button>
         </template>
       </div>
@@ -23,10 +23,10 @@
     <!--已完成的-->
     <div>
       <div>已完成的：</div>
-      <div v-for="item in todo.items" :key="item.uuid">
+      <div class="todo-item" v-for="item in todo.items" :key="item.uuid">
         <template v-if="!item.deleted && item.completed">
-          <el-button class="todo-button" size="mini" icon="el-icon-close" circle @click="item.completed = false;"></el-button>
-          <el-input class="todo-title" size="small" v-model="item.title"></el-input>
+          <el-button class="todo-button" size="mini" icon="el-icon-close" circle @click="updateStatus(item, false)"></el-button>
+          <el-input class="todo-title" size="small" v-model="item.title" disabled></el-input>
           <el-button class="todo-button" size="mini" icon="el-icon-delete" circle @click="removeItem(item)"></el-button>
         </template>
       </div>
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import UUID from "uuid";
 export default {
   data() {
@@ -55,23 +56,41 @@ export default {
     if(this.todoList && this.todoList.length && !this.todo) {
       this.todo = this.todoList[0];
     }
+    axios.get("http://localhost:8080/task/all").then(res => {
+      this.todo.items = res.data;
+    })
   },
   methods: {
     addItem() {
-      this.todo.items.push({
+      let item = {
         uuid: UUID.v4().split("-").join(""),
+        title: "",
         completed: false,
         deleted: false,
-      })
+      };
+      this.todo.items.push(item)
+      this.updateItem(item);
     },
     removeItem(item) {
       item.deleted = true;
+      this.updateItem(item);
     },
+    updateStatus(item, status) {
+      item.completed = status;
+      this.updateItem(item);
+    },
+    updateItem(item) {
+      debugger
+      window
+      axios.post("http://localhost:8080/task/save", item).then(res => {
+      })
+    }
+
   }
 }
 </script>
 
-<style>
+<style scoped>
 
 .todo-title {
   border: 0px;
