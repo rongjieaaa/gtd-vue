@@ -46,7 +46,6 @@ export default {
         {
           title: "todoList",
           items: [],
-          completed: [],
         }
       ],
       todo: undefined,
@@ -80,8 +79,6 @@ export default {
       this.updateItem(item);
     },
     updateItem(item) {
-      debugger
-      window
       axios.post("http://localhost:8080/task/save", item).then(res => {
       })
     }
